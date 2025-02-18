@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Tasks collection rules
+    match /tasks/{taskId} {
+      // Allow creation if user is signed in and setting themselves as owner
+      allow create: if isSignedIn();
+
+      // Allow read/update/delete only for task owner
+      allow read, update, delete: if isSignedIn();
+    }
+  }
+}
